@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Findr | Campus Lost & Found Portal</title>
+
+    <meta name="description"
+        content="Find lost belongings and report found items on your college campus.">
+
+    <!-- Website Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS File -->
+    <link rel="stylesheet" href="./style.css">
+
+    <!-- JavaScript File -->
+    <script src="./script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <header class="navbar">
+
+        <a href="#home" class="logo">
+            <span class="logo-icon">⌕</span>
+            <span>Findr</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation">
+            <a href="#home">Home</a>
+            <a href="#items">Lost Items</a>
+            <a href="#report">Report Item</a>
+            <a href="#guidelines">Pickup Guidelines</a>
+        </nav>
+
+        <div class="nav-actions">
+
+            <form id="navSearchForm" class="nav-search" role="search">
+                <span aria-hidden="true">⌕</span>
+
+                <input
+                    type="search"
+                    id="navSearchInput"
+                    placeholder="Search lost items"
+                    aria-label="Search lost items"
+                >
+            </form>
+
+            <a href="#report" class="login-button">Login</a>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main>
+
+        <!-- ================= HERO SECTION ================= -->
+        <section id="home" class="hero">
+
+            <div class="hero-content">
+
+                <p class="hero-tagline">YOUR CAMPUS, CONNECTED</p>
+
+                <h1>
+                    Lost Something On Campus?
+                    <br>
+                    Let’s Help You Find It
+                </h1>
+
+                <p class="hero-description">
+                    Searched every corner of campus? Don’t stress!
+                    Post, search, or report lost and found items in
+                    minutes. Reconnect with what matters.
+                </p>
+
+                <div class="hero-buttons">
+
+                    <a href="#report" class="btn btn-light">
+                        Report an Item
+                    </a>
+
+                    <a href="#items" class="btn btn-orange">
+                        Browse Lost Items
+                    </a>
+
+                </div>
+
+                <p class="hero-note">
+                    ✓ Helping students reconnect with their belongings
+                </p>
+
+            </div>
+
+
+            <!-- Hero Illustration -->
+            <div class="hero-image">
+
+                <img
+                    src="assets/Campus Lost and Found Search.png"
+                    alt="Illustration representing searching for lost belongings"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CAMPUS HIGHLIGHTS ================= -->
+        <section class="stats-section">
+
+            <article class="stat-card">
+                <span class="stat-icon">🔎</span>
+                <h3>Report Lost Items</h3>
+                <p>Tell your campus community what you lost.</p>
+            </article>
+
+            <article class="stat-card">
+                <span class="stat-icon">🎒</span>
+                <h3>Report Found Items</h3>
+                <p>Help belongings get back to their owners.</p>
+            </article>
+
+            <article class="stat-card">
+                <span class="stat-icon">🤝</span>
+                <h3>Reconnect</h3>
+                <p>Make your campus community more helpful.</p>
+            </article>
+
+        </section>
+
+
+        <!-- ================= LOST ITEMS BANNER ================= -->
+        <section class="items-banner">
+
+            <div class="banner-overlay">
+
+                <p class="section-eyebrow">CAMPUS LOST & FOUND</p>
+
+                <h2>Lost Items</h2>
+
+                <p>
+                    Browse recently reported items and find
+                    something that belongs to you.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ITEMS SECTION ================= -->
+        <section id="items" class="items-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-eyebrow">CAMPUS COMMUNITY</p>
+                    <h2>Recently Reported Items</h2>
+                </div>
+
+                <a href="#report" class="text-link">
+                    Report an Item →
+                </a>
+
+            </div>
+
+
+            <!-- Search and Filters -->
+            <div class="filter-bar">
+
+                <label class="search-box" for="searchInput">
+
+                    <span aria-hidden="true">⌕</span>
+
+                    <input
+                        type="search"
+                        id="searchInput"
+                        placeholder="Search by item or location..."
+                    >
+
+                </label>
+
+
+                <select id="typeFilter" aria-label="Filter by item type">
+                    <option value="All">All Items</option>
+                    <option value="Lost">Lost Items</option>
+                    <option value="Found">Found Items</option>
+                </select>
+
+
+                <select id="categoryFilter" aria-label="Filter by category">
+                    <option value="All">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Footwear">Footwear</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Bottle">Bottle</option>
+                    <option value="Books">Books</option>
+                    <option value="ID Card">ID Card</option>
+                    <option value="Other">Other</option>
+                </select>
+
+            </div>
+
+
+            <!-- Item Cards -->
+            <div id="itemList" class="item-grid">
+            </div>
+
+
+            <p id="emptyMessage" class="empty-message" hidden>
+                No matching items found.
+            </p>
+
+        </section>
+
+
+        <!-- ================= REPORT FORM ================= -->
+        <section id="report" class="report-section">
+
+            <div class="report-intro">
+
+                <p class="section-eyebrow">HELP YOUR COMMUNITY</p>
+
+                <h2>Report a Lost or Found Item</h2>
+
+                <p>
+                    Share item details so the rightful owner
+                    can identify their belongings.
+                </p>
+
+            </div>
+
+
+            <form id="itemForm" class="report-form">
+
+                <div class="form-group">
+                    <label for="itemName">Item Name *</label>
+
+                    <input
+                        type="text"
+                        id="itemName"
+                        name="itemName"
+                        placeholder="e.g. Blue Water Bottle"
+                        maxlength="80"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="itemType">Report Type *</label>
+
+                    <select id="itemType" name="itemType" required>
+                        <option value="">Select report type</option>
+                        <option value="Lost">I lost an item</option>
+                        <option value="Found">I found an item</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="itemCategory">Category *</label>
+
+                    <select id="itemCategory" name="itemCategory" required>
+                        <option value="">Select category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Bottle">Bottle</option>
+                        <option value="Books">Books</option>
+                        <option value="ID Card">ID Card</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="itemLocation">Location *</label>
+
+                    <input
+                        type="text"
+                        id="itemLocation"
+                        name="itemLocation"
+                        placeholder="e.g. College Library"
+                        maxlength="120"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="itemDate">Date *</label>
+
+                    <input
+                        type="date"
+                        id="itemDate"
+                        name="itemDate"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="itemImage">Upload Item Photo</label>
+
+                    <input
+                        type="file"
+                        id="itemImage"
+                        name="itemImage"
+                        accept="image/png,image/jpeg,image/webp"
+                    >
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label for="itemDescription">Description *</label>
+
+                    <textarea
+                        id="itemDescription"
+                        name="itemDescription"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Describe the item and its identifying features..."
+                        required
+                    ></textarea>
+                </div>
+
+
+                <p class="form-note full-width">
+                    * Required fields. Please do not include passwords
+                    or other sensitive personal information.
+                </p>
+
+
+                <div class="full-width">
+                    <button type="submit" class="submit-button">
+                        Submit Report
+                    </button>
+                </div>
+
+            </form>
+
+
+            <p id="formMessage" role="status" aria-live="polite"></p>
+
+        </section>
+
+
+        <!-- ================= PICKUP GUIDELINES ================= -->
+        <section id="guidelines" class="guidelines-section">
+
+            <div class="section-heading">
+                <div>
+                    <p class="section-eyebrow">STAY SAFE</p>
+                    <h2>Pickup Guidelines</h2>
+                </div>
+            </div>
+
+
+            <div class="guidelines-grid">
+
+                <article class="guideline-card">
+                    <span class="guideline-number">01</span>
+                    <h3>Verify the Item</h3>
+                    <p>
+                        Check identifying details before claiming
+                        any reported belongings.
+                    </p>
+                </article>
+
+
+                <article class="guideline-card">
+                    <span class="guideline-number">02</span>
+                    <h3>Meet in a Safe Place</h3>
+                    <p>
+                        Choose a public campus location or contact
+                        authorised college staff.
+                    </p>
+                </article>
+
+
+                <article class="guideline-card">
+                    <span class="guideline-number">03</span>
+                    <h3>Protect Your Privacy</h3>
+                    <p>
+                        Avoid sharing passwords or sensitive
+                        personal information.
+                    </p>
+                </article>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= ITEM DETAILS DIALOG ================= -->
+    <dialog id="itemDialog" class="item-dialog" aria-labelledby="dialogTitle">
+        <button type="button" id="dialogClose" class="dialog-close" aria-label="Close details">✕</button>
+        <img id="dialogImage" src="" alt="">
+        <div class="dialog-body">
+            <span id="dialogBadge" class="item-badge"></span>
+            <p id="dialogCategory" class="item-category"></p>
+            <h3 id="dialogTitle"></h3>
+            <p class="item-detail"><strong>Location:</strong> <span id="dialogLocation"></span></p>
+            <p class="item-detail"><strong>Date:</strong> <span id="dialogDate"></span></p>
+            <p id="dialogDescription" class="dialog-description"></p>
+            <p class="dialog-note">
+                Verify identifying details before claiming, and meet in a public campus
+                place. See the <a href="#guidelines" id="dialogGuidelines">Pickup Guidelines</a>.
+            </p>
+        </div>
+    </dialog>
+
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="footer">
+
+        <a href="#home" class="footer-logo">Findr</a>
+
+        <p>
+            Helping students reconnect with their belongings.
+        </p>
+
+        <div class="footer-links">
+            <a href="#home">Home</a>
+            <a href="#items">Lost Items</a>
+            <a href="#report">Report Item</a>
+            <a href="#guidelines">Guidelines</a>
+        </div>
+
+        <p class="copyright">
+            &copy; 2026 Findr Campus Lost & Found Portal.
+            College Mini Project.
+        </p>
+
+    </footer>
+
+</body>
+</html>
