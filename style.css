@@ -1230,3 +1230,15 @@ a:focus-visible, button:focus-visible {
         transition-duration: .01ms !important;
     }
 }
+
+
+/* Only reduce button icon size on mobile */
+@media (max-width: 650px) {
+    .hero-buttons .btn-icon {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        font-size: 17px;
+    }
+}
+
