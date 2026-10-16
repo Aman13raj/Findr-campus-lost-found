@@ -1240,3 +1240,12 @@ a:focus-visible, button:focus-visible {
         font-size: 17px;
     }
 }
+
+.footer-credit {
+    text-align: left;
+    max-width: 1320px;
+    margin: 12px auto 0;
+    padding: 0 20px;
+    color: #d6e5de;
+    font-size: 14px;
+}
