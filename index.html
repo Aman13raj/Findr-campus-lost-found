@@ -62,12 +62,16 @@
 
             
            
+<!-- Notification ON/OFF Toggle -->
 <div class="push-action">
     <div class="push-toggle-info">
         <span class="push-toggle-title">Notifications</span>
-        <span id="pushStatus" class="push-status" role="status">
-            Checking status...
-        </span>
+        <span
+            id="pushStatus"
+            class="push-status"
+            role="status"
+            aria-live="polite"
+        >Checking status...</span>
     </div>
 
     <button
@@ -81,9 +85,6 @@
         <span class="push-toggle-knob"></span>
     </button>
 </div>
-
-             <p id="pushStatus" class="push-status" role="status" aria-live="polite"></p>
-            </div>
 
             
             <!-- Professional Notification Bell -->
