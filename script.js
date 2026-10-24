@@ -730,44 +730,81 @@ claimForm.addEventListener("submit", async function (event) {
     }
 });
 
-const PUSH_VAPID_PUBLIC_KEY = "BG8QUrjelZV5lnOOGSMKK84-DZo0FL6_ribWS2NAfHnc2JwqMJiuH2EpHwzHe1DCtXeCnumHf6bT8-3B6HJZ0eY";
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+/* ---------- Findr Push Notification ON/OFF ---------- */
 
-  const raw = atob(base64);
-  return Uint8Array.from(raw, (char) => char.charCodeAt(0));
+const PUSH_VAPID_PUBLIC_KEY =
+    "BG8QUrjelZV5lnOOGSMKK84-DZo0FL6_ribWS2NAfHnc2JwqMJiuH2EpHwzHe1DCtXeCnumHf6bT8-3B6HJZ0eY";
+
+const pushToggle = document.getElementById("enablePushBtn");
+const pushStatus = document.getElementById("pushStatus");
+
+let pushBusy = false;
+
+function updatePushUI(enabled, message) {
+    if (!pushToggle || !pushStatus) return;
+
+    pushToggle.classList.toggle("is-enabled", enabled);
+    pushToggle.setAttribute("aria-checked", String(enabled));
+    pushToggle.setAttribute(
+        "aria-label",
+        enabled ? "Turn push notifications off" : "Turn push notifications on"
+    );
+
+    pushStatus.textContent =
+        message || (enabled ? "Notifications are ON" : "Notifications are OFF");
 }
 
-async function enableFindrPush() {
-  const status = document.getElementById("pushStatus");
-  const button = document.getElementById("enablePushBtn");
+function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
 
-  try {
+    const raw = atob(base64);
+    return Uint8Array.from(raw, char => char.charCodeAt(0));
+}
+
+async function getFindrPushSubscription() {
+    if (!("serviceWorker" in navigator) ||
+        !("PushManager" in window)) {
+        return null;
+    }
+
+    const registration = await navigator.serviceWorker.getRegistration(
+        new URL("./", document.baseURI).pathname
+    );
+
+    if (!registration) return null;
+
+    return registration.pushManager.getSubscription();
+}
+
+async function turnPushOn() {
+    if (!window.isSecureContext) {
+        throw new Error("Findr ko HTTPS par open karo.");
+    }
+
     if (!("serviceWorker" in navigator) ||
         !("PushManager" in window) ||
         !("Notification" in window)) {
-      throw new Error("Ye browser Web Push support nahi karta.");
+        throw new Error("Is browser mein push notifications supported nahi hain.");
     }
 
-    if (!window.isSecureContext) {
-      throw new Error("HTTPS par Findr open karo.");
+    if (Notification.permission === "denied") {
+        throw new Error(
+            "Browser settings mein Findr notifications allow karo, phir try karo."
+        );
     }
-
-    button.disabled = true;
-    status.textContent = "Notifications setup ho rahi hain…";
 
     const permission = await Notification.requestPermission();
 
     if (permission !== "granted") {
-      throw new Error("Browser notification permission allow nahi hui.");
+        throw new Error("Browser notification permission allow nahi hui.");
     }
 
     const registration = await navigator.serviceWorker.register(
-      new URL("./service-worker.js", document.baseURI)
+        new URL("./service-worker.js", document.baseURI)
     );
 
     await navigator.serviceWorker.ready;
@@ -775,33 +812,113 @@ async function enableFindrPush() {
     let subscription = await registration.pushManager.getSubscription();
 
     if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY)
-      });
+        subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(
+                PUSH_VAPID_PUBLIC_KEY
+            )
+        });
     }
 
+    // Save the subscription on the existing Supabase Edge Function.
     const response = await fetch(
-      "https://iffrezhshlytpaxzoaob.supabase.co/functions/v1/push-subscribe",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(subscription)
-      }
+        "https://iffrezhshlytpaxzoaob.supabase.co/functions/v1/push-subscribe",
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(subscription)
+        }
     );
 
     if (!response.ok) {
-      throw new Error("Subscription server par save nahi hui.");
+        // Avoid leaving a browser subscription that the server failed to save.
+        await subscription.unsubscribe();
+        throw new Error("Push subscription save nahi hui. Server configuration check karo.");
     }
 
-    status.textContent = "Findr push notifications enabled!";
-  } catch (error) {
-    console.error("Findr push setup error:", error);
-    status.textContent = error.message || "Setup fail hui. Dobara try karo.";
-  } finally {
-    button.disabled = false;
-  }
+    updatePushUI(true, "Notifications are ON");
 }
 
-document.getElementById("enablePushBtn")
-  ?.addEventListener("click", enableFindrPush);
+async function turnPushOff() {
+    const subscription = await getFindrPushSubscription();
+
+    if (subscription) {
+        const removed = await subscription.unsubscribe();
+
+        if (!removed) {
+            throw new Error("Subscription OFF nahi hui. Dobara try karo.");
+        }
+    }
+
+    updatePushUI(false, "Notifications are OFF");
+}
+
+async function handlePushToggle() {
+    if (pushBusy) return;
+
+    pushBusy = true;
+    pushToggle.disabled = true;
+    pushStatus.textContent = "Updating notification settings...";
+
+    try {
+        const currentlyEnabled =
+            pushToggle.getAttribute("aria-checked") === "true";
+
+        if (currentlyEnabled) {
+            await turnPushOff();
+        } else {
+            await turnPushOn();
+        }
+    } catch (error) {
+        console.error("Findr push notification error:", error);
+
+        // Read the actual browser subscription to avoid showing a false state.
+        try {
+            const subscription = await getFindrPushSubscription();
+            const enabled = Boolean(
+                subscription && Notification.permission === "granted"
+            );
+
+            updatePushUI(
+                enabled,
+                error.message || "Notification setting update nahi hui."
+            );
+        } catch {
+            updatePushUI(false, error.message || "Notification setting update nahi hui.");
+        }
+    } finally {
+        pushBusy = false;
+        pushToggle.disabled = false;
+    }
+}
+
+async function initialisePushToggle() {
+    updatePushUI(false, "Notifications are OFF");
+
+    try {
+        if (!("Notification" in window)) {
+            updatePushUI(false, "Push notifications unsupported");
+            pushToggle.disabled = true;
+            return;
+        }
+
+        const subscription = await getFindrPushSubscription();
+        const enabled = Boolean(
+            subscription && Notification.permission === "granted"
+        );
+
+        updatePushUI(
+            enabled,
+            enabled ? "Notifications are ON" : "Notifications are OFF"
+        );
+    } catch (error) {
+        console.error("Could not check push status:", error);
+        updatePushUI(false, "Notification status unavailable");
+    }
+}
+
+if (pushToggle && pushStatus) {
+    pushToggle.addEventListener("click", handlePushToggle);
+    initialisePushToggle();
+}
+
