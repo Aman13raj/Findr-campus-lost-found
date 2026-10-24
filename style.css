@@ -1517,3 +1517,71 @@ a:focus-visible, button:focus-visible {
         width: 100%;
     }
 }
+
+
+
+/* Findr notification toggle */
+.push-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.push-toggle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.push-toggle-title {
+    font-weight: 600;
+}
+
+.push-status {
+    font-size: 12px;
+}
+
+button.push-toggle {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    width: 48px;
+    height: 27px;
+    padding: 3px;
+    border: 1px solid #aab8b2;
+    border-radius: 999px;
+    background: #d5ddd9;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+button.push-toggle .push-toggle-knob {
+    display: block;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 3px #0003;
+    transform: translateX(0);
+    transition: transform 0.2s ease;
+}
+
+button.push-toggle.is-enabled {
+    background: #15966b;
+    border-color: #15966b;
+}
+
+button.push-toggle.is-enabled .push-toggle-knob {
+    transform: translateX(20px);
+}
+
+button.push-toggle:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+button.push-toggle:focus-visible {
+    outline: 3px solid #f99a35;
+    outline-offset: 3px;
+}
