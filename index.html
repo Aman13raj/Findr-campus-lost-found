@@ -60,10 +60,27 @@
 
             <a href="#report" class="login-button">Report</a>
 
-            <button id="enablePushBtn" type="button">
-             Enable Push Notifications
-            </button>
-            <p id="pushStatus" role="status" aria-live="polite"></p>
+            
+           <div class="push-action">
+              <button id="enablePushBtn" class="push-notification-btn" type="button">
+                  <svg
+                    class="push-btn-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                   >
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                  <path d="M10 21h4"/>
+                 </svg>
+               <span>Enable Notifications</span>
+             </button>
+
+             <p id="pushStatus" class="push-status" role="status" aria-live="polite"></p>
+            </div>
 
             
             <!-- Professional Notification Bell -->
