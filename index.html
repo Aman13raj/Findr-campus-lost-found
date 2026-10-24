@@ -58,10 +58,72 @@
                 >
             </form>
 
-            <a href="#report" class="login-button">Login</a>
+            <a href="#report" class="login-button">Report</a>
+
+            <button id="enablePushBtn" type="button">
+             Enable Push Notifications
+            </button>
+            <p id="pushStatus" role="status" aria-live="polite"></p>
+
+            
+            <!-- Professional Notification Bell -->
+            <div class="notification-wrapper">
+                <button
+                    type="button"
+                    id="notificationBell"
+                    class="notification-bell"
+                    aria-label="Open notifications"
+                    aria-expanded="false"
+                    aria-controls="notificationPanel"
+                >
+                    <svg
+                        class="bell-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                        <path d="M10 21h4"/>
+                    </svg>
+
+                    <span id="notificationCount" class="notification-count" hidden>0</span>
+                </button>
+
+                <section
+                    id="notificationPanel"
+                    class="notification-panel"
+                    aria-label="Notifications"
+                    hidden
+                >
+                    <div class="notification-header">
+                        <div>
+                            <h3>Notifications</h3>
+                            <p>Stay updated with campus activity</p>
+                        </div>
+                        <span class="notification-header-icon">✦</span>
+                    </div>
+
+                    <div id="notificationList" class="notification-list">
+                        <p class="notification-empty">Loading notifications...</p>
+                    </div>
+
+                    <div class="notification-footer">
+                        <span>Findr Campus</span>
+                        <span>● Live updates</span>
+                    </div>
+                </section>
+            </div>
+
 
         </div>
 
+
+
+        
     </header>
 
 

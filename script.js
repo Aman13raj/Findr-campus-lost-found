@@ -488,6 +488,8 @@ items.unshift({
 
 saveUserItems();
 
+
+
 // Reset form and filters so the new item is visible
 itemForm.reset();
 setDateDefaults();
@@ -506,6 +508,172 @@ showMessage("✓ Report successfully saved to Supabase!", false);
 setDateDefaults();
 renderItems();
 loadDatabaseItems();
+
+
+/* ---------- Findr Notifications ---------- */
+
+const notificationBell =
+    document.getElementById("notificationBell");
+
+const notificationCount =
+    document.getElementById("notificationCount");
+
+const notificationPanel =
+    document.getElementById("notificationPanel");
+
+const notificationList =
+    document.getElementById("notificationList");
+
+const seenNotificationKey = "findr-seen-notifications";
+
+let findrNotifications = [];
+
+let seenNotificationIds;
+
+try {
+    seenNotificationIds = new Set(
+        JSON.parse(
+            localStorage.getItem(seenNotificationKey) || "[]"
+        ).map(String)
+    );
+} catch {
+    seenNotificationIds = new Set();
+}
+
+function renderFindrNotifications() {
+    if (!notificationList || !notificationCount) return;
+
+    const unread = findrNotifications.filter(
+        notification =>
+            !seenNotificationIds.has(String(notification.id))
+    ).length;
+
+    notificationCount.textContent = unread > 99 ? "99+" : String(unread);
+notificationCount.hidden = unread === 0;
+
+    notificationList.replaceChildren();
+
+    if (findrNotifications.length === 0) {
+        notificationList.textContent = "No notifications yet.";
+        return;
+    }
+
+    findrNotifications.forEach(notification => {
+        const card = document.createElement("div");
+        card.className = "notification-item";
+
+        const title = document.createElement("strong");
+        title.textContent = notification.title;
+
+        const message = document.createElement("p");
+        message.textContent = notification.message;
+
+        const date = document.createElement("small");
+        date.textContent = new Date(
+            notification.created_at
+        ).toLocaleString();
+
+        card.append(title, message, date);
+        notificationList.appendChild(card);
+    });
+}
+
+async function loadFindrNotifications() {
+    const { data, error } = await supabaseClient
+        .from("notifications")
+        .select("id, title, message, item_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+    if (error) {
+        console.error(
+            "Notification loading error:",
+            error.message
+        );
+
+        if (notificationList) {
+            notificationList.textContent =
+                "Notifications load nahi ho paayi.";
+        }
+        return;
+    }
+
+    findrNotifications = data || [];
+    renderFindrNotifications();
+}
+
+
+if (notificationBell && notificationPanel) {
+    notificationBell.addEventListener("click", () => {
+        const isOpening = notificationPanel.hidden;
+
+        notificationPanel.hidden = !isOpening;
+        notificationBell.setAttribute("aria-expanded", String(isOpening));
+
+        if (isOpening) {
+            findrNotifications.forEach(notification => {
+                seenNotificationIds.add(String(notification.id));
+            });
+
+            localStorage.setItem(
+                seenNotificationKey,
+                JSON.stringify([...seenNotificationIds].slice(-500))
+            );
+
+            renderFindrNotifications();
+        }
+    });
+
+    document.addEventListener("click", event => {
+        if (!event.target.closest(".notification-wrapper")) {
+            notificationPanel.hidden = true;
+            notificationBell.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            notificationPanel.hidden = true;
+            notificationBell.setAttribute("aria-expanded", "false");
+        }
+    });
+}
+
+
+// Live updates while the website is open
+const findrNotificationChannel = supabaseClient
+    .channel("findr-live-notifications")
+    .on(
+        "postgres_changes",
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications"
+        },
+        payload => {
+            const newNotification = payload.new;
+
+            findrNotifications = [
+                newNotification,
+                ...findrNotifications.filter(
+                    item =>
+                        String(item.id) !==
+                        String(newNotification.id)
+                )
+            ].slice(0, 50);
+
+            renderFindrNotifications();
+        }
+    )
+    .subscribe(status => {
+        if (status === "SUBSCRIBED") {
+            loadFindrNotifications();
+        }
+    });
+
+// Load existing notifications on startup
+loadFindrNotifications();
+
 
 
 
@@ -561,3 +729,79 @@ claimForm.addEventListener("submit", async function (event) {
         submitButton.disabled = false;
     }
 });
+
+const PUSH_VAPID_PUBLIC_KEY = "BLXq56WyfNfFxuvBgCMcQfLCFpaa5Jcdr3oLbsmIwxxOcT8k40yXX7L_sSfY5FWU-vsinhfu0SjE6_ahoKnU5wI";
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+
+  const raw = atob(base64);
+  return Uint8Array.from(raw, (char) => char.charCodeAt(0));
+}
+
+async function enableFindrPush() {
+  const status = document.getElementById("pushStatus");
+  const button = document.getElementById("enablePushBtn");
+
+  try {
+    if (!("serviceWorker" in navigator) ||
+        !("PushManager" in window) ||
+        !("Notification" in window)) {
+      throw new Error("Ye browser Web Push support nahi karta.");
+    }
+
+    if (!window.isSecureContext) {
+      throw new Error("HTTPS par Findr open karo.");
+    }
+
+    button.disabled = true;
+    status.textContent = "Notifications setup ho rahi hain…";
+
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      throw new Error("Browser notification permission allow nahi hui.");
+    }
+
+    const registration = await navigator.serviceWorker.register(
+      new URL("./service-worker.js", document.baseURI)
+    );
+
+    await navigator.serviceWorker.ready;
+
+    let subscription = await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY)
+      });
+    }
+
+    const response = await fetch(
+      "https://iffrezhshlytpaxzoaob.supabase.co/functions/v1/push-subscribe",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscription)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Subscription server par save nahi hui.");
+    }
+
+    status.textContent = "Findr push notifications enabled!";
+  } catch (error) {
+    console.error("Findr push setup error:", error);
+    status.textContent = error.message || "Setup fail hui. Dobara try karo.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
+document.getElementById("enablePushBtn")
+  ?.addEventListener("click", enableFindrPush);
