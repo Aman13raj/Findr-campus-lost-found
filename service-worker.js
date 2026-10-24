@@ -2,7 +2,7 @@ self.addEventListener("push", (event) => {
   let data = {
     title: "Findr — Campus Lost & Found",
     body: "Findr par ek naya item report hua hai.",
-    url: "https://aman13raj.github.io/Findr-campus-lost-found"
+    url: "https://aman13raj.github.io/Findr-campus-lost-found/"
   };
 
   if (event.data) {
@@ -18,7 +18,7 @@ self.addEventListener("push", (event) => {
       body: data.body,
       icon: "./assets/favicon.png",
 badge: "./assets/favicon.png",
-      data: { url: data.url || "./" }
+      data: { url: data.url || "https://aman13raj.github.io/Findr-campus-lost-found/" }
     })
   );
 });
@@ -27,8 +27,8 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const targetUrl = new URL(
-  event.notification.data?.url || "https://aman13raj.github.io/Findr-campus-lost-found",
-  "https://aman13raj.github.io"
+  event.notification.data?.url ||
+    "https://aman13raj.github.io/Findr-campus-lost-found/"
 ).href;
 
   event.waitUntil(
