@@ -2,7 +2,7 @@ self.addEventListener("push", (event) => {
   let data = {
     title: "Findr — Campus Lost & Found",
     body: "Findr par ek naya item report hua hai.",
-    url: "./"
+    url: "/Findr-campus-lost-found/"
   };
 
   if (event.data) {
@@ -27,9 +27,9 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const targetUrl = new URL(
-    event.notification.data?.url || "./",
-    self.location.origin
-  ).href;
+  event.notification.data?.url || "/Findr-campus-lost-found/",
+  "https://aman13raj.github.io"
+).href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true })
