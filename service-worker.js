@@ -26,9 +26,10 @@ badge: "./assets/favicon.png",
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const targetUrl = new URL(
+  const targetUrl = 
   event.notification.data?.url ||
-    "https://aman13raj.github.io/Findr-campus-lost-found/"
+  "https://aman13raj.github.io/Findr-campus-lost-found/";
+  self.location.origin
 ).href;
 
   event.waitUntil(
