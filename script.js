@@ -730,7 +730,7 @@ claimForm.addEventListener("submit", async function (event) {
     }
 });
 
-const PUSH_VAPID_PUBLIC_KEY = "BLXq56WyfNfFxuvBgCMcQfLCFpaa5Jcdr3oLbsmIwxxOcT8k40yXX7L_sSfY5FWU-vsinhfu0SjE6_ahoKnU5wI";
+const PUSH_VAPID_PUBLIC_KEY = "BG8QUrjelZV5lnOOGSMKK84-DZo0FL6_ribWS2NAfHnc2JwqMJiuH2EpHwzHe1DCtXeCnumHf6bT8-3B6HJZ0eY";
 
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
