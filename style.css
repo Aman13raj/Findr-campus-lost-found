@@ -1440,3 +1440,80 @@ a:focus-visible, button:focus-visible {
         max-height: calc(100vh - 100px);
     }
 }
+
+
+
+/* Professional Push Notification Button */
+.push-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.push-notification-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid #164e3b;
+    border-radius: 10px;
+    background: #164e3b;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(22, 78, 59, 0.12);
+    transition: background 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
+}
+
+.push-notification-btn:hover {
+    background: #103c2e;
+    box-shadow: 0 5px 12px rgba(22, 78, 59, 0.18);
+    transform: translateY(-1px);
+}
+
+.push-notification-btn:active {
+    transform: translateY(0);
+}
+
+.push-notification-btn:focus-visible {
+    outline: 3px solid #f99b38;
+    outline-offset: 3px;
+}
+
+.push-notification-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.push-btn-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.push-status {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #64746d;
+}
+
+@media (max-width: 900px) {
+    .push-action {
+        align-items: stretch;
+    }
+
+    .push-notification-btn {
+        width: 100%;
+    }
+}
