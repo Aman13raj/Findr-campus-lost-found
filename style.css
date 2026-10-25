@@ -1581,3 +1581,46 @@ button.push-toggle:focus-visible {
     outline: 3px solid #f99a35;
     outline-offset: 3px;
 }
+
+
+/* Minimal premium notification status */
+.notification-status-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 10px;
+    border-radius: 12px;
+    color: #737f79;
+    background: transparent;
+    white-space: nowrap;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.notification-status-icon {
+    flex-shrink: 0;
+    color: #7a8982;
+}
+
+.notification-status-nav.is-enabled {
+    color: #147d5a;
+}
+
+.notification-status-nav.is-enabled .notification-status-icon {
+    color: #147d5a;
+}
+
+.notification-status-nav.is-disabled {
+    color: #737f79;
+}
+
+@media (max-width: 600px) {
+    .notification-status-nav {
+        gap: 5px;
+        padding: 8px 5px;
+        font-size: 11px;
+    }
+}
