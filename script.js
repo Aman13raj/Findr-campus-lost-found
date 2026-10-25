@@ -954,4 +954,232 @@ if (pushToggle && pushStatus) {
     initialisePushToggle();
 }
 
+/* ---------- First-visit notification welcome popup ---------- */
+(function setupPushWelcomePopup() {
+    const DISMISSED_KEY = "findr-push-welcome-dismissed";
 
+    // Required existing controls must be available.
+    if (!pushToggle || !pushStatus) return;
+
+    // Create popup styles.
+    const style = document.createElement("style");
+    style.textContent = `
+        .findr-welcome-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(12, 24, 18, 0.58);
+            backdrop-filter: blur(5px);
+        }
+
+        .findr-welcome-overlay[hidden] {
+            display: none;
+        }
+
+        .findr-welcome-card {
+            width: 100%;
+            max-width: 390px;
+            padding: 30px 24px;
+            border-radius: 22px;
+            background: #fff;
+            color: #18251d;
+            text-align: center;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+            font-family: inherit;
+            animation: findrWelcomeIn 0.22s ease-out;
+        }
+
+        .findr-welcome-icon {
+            display: grid;
+            place-items: center;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 18px;
+            border-radius: 20px;
+            background: #e7f4e9;
+            font-size: 30px;
+        }
+
+        .findr-welcome-card h2 {
+            margin: 0 0 10px;
+            font-size: 25px;
+            line-height: 1.25;
+        }
+
+        .findr-welcome-card p {
+            margin: 0 0 22px;
+            color: #657168;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .findr-welcome-enable,
+        .findr-welcome-later {
+            width: 100%;
+            min-height: 46px;
+            border-radius: 12px;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .findr-welcome-enable {
+            border: 0;
+            background: #246b45;
+            color: #fff;
+        }
+
+        .findr-welcome-enable:hover {
+            background: #1b5536;
+        }
+
+        .findr-welcome-enable:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+        .findr-welcome-later {
+            margin-top: 10px;
+            border: 1px solid #e1e8e2;
+            background: #fff;
+            color: #46534a;
+        }
+
+        .findr-welcome-status {
+            margin-top: 12px !important;
+            margin-bottom: 0 !important;
+            font-size: 13px !important;
+        }
+
+        @keyframes findrWelcomeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .findr-welcome-card {
+                animation: none;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Build popup without changing your existing HTML.
+    const overlay = document.createElement("div");
+    overlay.className = "findr-welcome-overlay";
+    overlay.hidden = true;
+
+    overlay.innerHTML = `
+        <section
+            class="findr-welcome-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="findrWelcomeTitle"
+            aria-describedby="findrWelcomeDescription"
+        >
+            <div class="findr-welcome-icon" aria-hidden="true">🔔</div>
+            <h2 id="findrWelcomeTitle">Stay in the loop</h2>
+            <p id="findrWelcomeDescription">
+                Get notified about campus lost and found updates,
+                so you don't miss important item alerts.
+            </p>
+            <button type="button" class="findr-welcome-enable">
+                Enable notifications
+            </button>
+            <button type="button" class="findr-welcome-later">
+                Maybe later
+            </button>
+            <p class="findr-welcome-status" role="status" hidden></p>
+        </section>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const enableButton = overlay.querySelector(".findr-welcome-enable");
+    const laterButton = overlay.querySelector(".findr-welcome-later");
+    const statusText = overlay.querySelector(".findr-welcome-status");
+
+    function closePopup() {
+        overlay.hidden = true;
+    }
+
+    laterButton.addEventListener("click", function () {
+        try {
+            localStorage.setItem(DISMISSED_KEY, "yes");
+        } catch (error) {
+            console.warn("Could not save popup preference.", error);
+        }
+        closePopup();
+    });
+
+    enableButton.addEventListener("click", async function () {
+        enableButton.disabled = true;
+        statusText.hidden = false;
+        statusText.textContent = "Setting up notifications...";
+
+        try {
+            // Reuse Findr's existing notification subscription flow.
+            await handlePushToggle();
+
+            const enabled =
+                pushToggle.getAttribute("aria-checked") === "true";
+
+            if (enabled) {
+                try {
+                    localStorage.setItem(DISMISSED_KEY, "yes");
+                } catch (error) {
+                    console.warn("Could not save popup preference.", error);
+                }
+                closePopup();
+            } else {
+                statusText.textContent =
+                    pushStatus.textContent ||
+                    "Notifications could not be enabled. Please try again.";
+            }
+        } catch (error) {
+            console.error("Welcome popup notification error:", error);
+            statusText.textContent =
+                "Could not enable notifications. Please try again.";
+        } finally {
+            enableButton.disabled = false;
+        }
+    });
+
+    // Show only on a first visit when permission is still undecided
+    // and no active push subscription exists.
+    async function maybeShowPopup() {
+        try {
+            if (
+                !("Notification" in window) ||
+                !("serviceWorker" in navigator) ||
+                !("PushManager" in window) ||
+                !window.isSecureContext ||
+                Notification.permission !== "default" ||
+                localStorage.getItem(DISMISSED_KEY) === "yes"
+            ) {
+                return;
+            }
+
+            const subscription = await getFindrPushSubscription();
+
+            if (subscription) return;
+
+            overlay.hidden = false;
+        } catch (error) {
+            console.warn("Could not check notification setup.", error);
+        }
+    }
+
+    // Let the page finish initializing first.
+    window.setTimeout(maybeShowPopup, 900);
+})();
