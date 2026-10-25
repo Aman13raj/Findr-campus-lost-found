@@ -62,27 +62,28 @@
 
             
            
-<!-- Notification ON/OFF Toggle -->
-<div class="push-action">   
-  <div class="push-toggle-info">
-    <span class="push-toggle-title">Notifications</span>
-    <span id="pushStatus" class="push-status" role="status" aria-live="polite">
-        Notifications are off
-    </span>
-  </div>
 
-
-    <button
-        id="enablePushBtn"
-        class="push-toggle"
-        type="button"
-        role="switch"
-        aria-checked="false"
-        aria-label="Toggle push notifications"
+<!-- Minimal notification status -->
+<div class="notification-status-nav" id="notificationStatusNav">
+    <svg
+        class="notification-status-icon"
+        viewBox="0 0 24 24"
+        width="19"
+        height="19"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
     >
-        <span class="push-toggle-knob"></span>
-    </button>
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+        <path d="M10 21h4"/>
+    </svg>
+
+    <span id="notificationNavLabel">Checking alerts...</span>
 </div>
+
 
             
             <!-- Professional Notification Bell -->
