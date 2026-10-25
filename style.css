@@ -1582,7 +1582,6 @@ button.push-toggle:focus-visible {
     outline-offset: 3px;
 }
 
-
 /* Minimal premium notification status */
 .notification-status-nav {
     display: inline-flex;
