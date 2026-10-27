@@ -1113,14 +1113,10 @@ if (pushToggle && pushStatus) {
         overlay.hidden = true;
     }
 
-    laterButton.addEventListener("click", function () {
-        try {
-            localStorage.setItem(DISMISSED_KEY, "yes");
-        } catch (error) {
-            console.warn("Could not save popup preference.", error);
-        }
-        closePopup();
-    });
+    
+laterButton.addEventListener("click", function () {
+    closePopup();
+});
 
     enableButton.addEventListener("click", async function () {
         enableButton.disabled = true;
@@ -1165,7 +1161,6 @@ if (pushToggle && pushStatus) {
                 !("PushManager" in window) ||
                 !window.isSecureContext ||
                 Notification.permission !== "default" ||
-                localStorage.getItem(DISMISSED_KEY) === "yes"
             ) {
                 return;
             }
