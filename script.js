@@ -1196,3 +1196,4 @@ async function maybeShowPopup() {
 }
 
 window.setTimeout(maybeShowPopup, 900);
+})();
