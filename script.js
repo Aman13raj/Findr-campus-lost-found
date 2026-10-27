@@ -1153,28 +1153,46 @@ laterButton.addEventListener("click", function () {
 
     // Show only on a first visit when permission is still undecided
     // and no active push subscription exists.
-    async function maybeShowPopup() {
-        try {
-            if (
-                !("Notification" in window) ||
-                !("serviceWorker" in navigator) ||
-                !("PushManager" in window) ||
-                !window.isSecureContext ||
-                Notification.permission !== "default" ||
-            ) {
-                return;
-            }
+    
+async function maybeShowPopup() {
+    console.log("Findr popup: checking conditions...");
 
-            const subscription = await getFindrPushSubscription();
+    try {
+        console.log("Notification supported:", "Notification" in window);
+        console.log("Service worker supported:", "serviceWorker" in navigator);
+        console.log("Push supported:", "PushManager" in window);
+        console.log("Secure context:", window.isSecureContext);
+        console.log("Permission:", Notification.permission);
+        console.log("Popup element exists:", !!overlay);
 
-            if (subscription) return;
-
-            overlay.hidden = false;
-        } catch (error) {
-            console.warn("Could not check notification setup.", error);
+        if (
+            !("Notification" in window) ||
+            !("serviceWorker" in navigator) ||
+            !("PushManager" in window) ||
+            !window.isSecureContext
+        ) {
+            console.log("Popup blocked: browser support or secure context.");
+            return;
         }
-    }
 
-    // Let the page finish initializing first.
-    window.setTimeout(maybeShowPopup, 900);
-})();
+        if (Notification.permission !== "default") {
+            console.log("Popup skipped: permission is", Notification.permission);
+            return;
+        }
+
+        const subscription = await getFindrPushSubscription();
+        console.log("Existing subscription:", !!subscription);
+
+        if (subscription) {
+            console.log("Popup skipped: subscription already exists.");
+            return;
+        }
+
+        overlay.hidden = false;
+        console.log("Findr popup: SHOWING");
+    } catch (error) {
+        console.error("Findr popup check failed:", error);
+    }
+}
+
+window.setTimeout(maybeShowPopup, 900);
